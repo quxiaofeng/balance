@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configure>
+   <center>
+      <x>240</x><!--Test configure file saving.-->
+      <y>180</y><!--Test configure file saving.-->
+   </center>
+   <innerRadius>80</innerRadius>
+   <outerRadius>180</outerRadius><!--Test configure file saving.-->
+</configure>
