@@ -4,12 +4,16 @@
 %   resultDir = dir('exp-*');
 %   for i=1:length(resultDir);rmdir(resultDir(i).name,'s');end;
 
+% init path
 addpath('SaveResultsToAnExcel');
 addpath('ResumableExperiment');
+
+% prepare ranges
 DELTARANGE      = 0.1:0.1:0.2;
 SIGMARANGE      = 1:1:2;
 FILTERSIZERANGE = [10 20];
 DATAFOLDER      = cd;
+
 % init excels
 results10 = InitResultsForExcel('Delta\Sigma FilterSize 10',...
     DELTARANGE,SIGMARANGE);
