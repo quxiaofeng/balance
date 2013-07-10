@@ -32,6 +32,7 @@ classdef ResumableExperimentTest < matlab.unittest.TestCase
     %
     
     properties
+        DELTA
     end
     
     methods(TestMethodSetup)
@@ -45,7 +46,8 @@ classdef ResumableExperimentTest < matlab.unittest.TestCase
     end
     
     methods(Test)
-        function testInit(testCase)
+        function testExp(testCase)
+            
             testCase.verifyEqual(1, 1, ...
                 'The ''results'' cell is not initialed correctly');
         end

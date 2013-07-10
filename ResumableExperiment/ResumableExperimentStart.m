@@ -1,5 +1,5 @@
 function [ combination, flag, percent] = ...
-    ResumableExperimentStart( combinationList )
+    ResumableExperimentStart(combinationList, cacheFileName)
 %RESUMABLEEXPERIMENTSTART Summary of this function goes here
 %   Detailed explanation goes here
 %     + Start
@@ -13,10 +13,18 @@ function [ combination, flag, percent] = ...
 %       + save combinationList and progress
 %       + return a combination and 'continue'
 
+switch nargin
+    case 2
+    case 1
+        cacheFileName = 'progress_cache.mat';
+    otherwise
+        error('Wrong number of parameters!');
+end
+
 % start
-if exist('progress_cache.mat','file') == 2
+if exist(cacheFileName,'file') == 2
     % resume
-    load('progress_cache.mat','combinationList','progress');
+    load(cacheFileName,'combinationList','progress');
     if progress >= length(combinationList)
         [combination, flag, percent] = ResumableExperimentUpdate;
         return;
@@ -24,10 +32,10 @@ if exist('progress_cache.mat','file') == 2
 else
     % init
     progress = 0;
-    save('progress_cache.mat','combinationList','progress');
+    save(cacheFileName, 'combinationList', 'progress');
 end
 combination = combinationList(progress+1);
 flag = 'continue';
-percent = progress/length(combinationList);
+percent = progress / length(combinationList);
 end
 
