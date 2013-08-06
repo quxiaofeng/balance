@@ -28,7 +28,7 @@ classdef ResumableExperimentTest < matlab.unittest.TestCase
     %      end
     %
     %   Example:
-    %       clear;testCase=SaveResultsTest;res = run(SaveResultsTest)
+    %       res = run(ResumableExperimentTest)
     %
     
     properties
@@ -47,9 +47,8 @@ classdef ResumableExperimentTest < matlab.unittest.TestCase
     
     methods(Test)
         function testExp(testCase)
-            
             testCase.verifyEqual(1, 1, ...
-                'The ''results'' cell is not initialed correctly');
+                'Not implement even one test');
         end
     end
 end
