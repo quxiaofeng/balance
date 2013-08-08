@@ -1,4 +1,5 @@
-function [ eer ] = ResumableTestExperiment(combination, varNameList)
+function [ eer ] = ResumableTestExperiment(combination, varNameList, ...
+    RESULTFOLDER)
 %RESUMABLETESTEXPERIMENT Summary of this function goes here
 %   Detailed explanation goes here
 
