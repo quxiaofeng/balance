@@ -3,7 +3,7 @@ function [ ] = ResumableExcelSavingExperiment( ...
     experimentCodeName, ...
     varNameList, ...
     varRangeList, ...
-    DATAFOLDER)
+    rootFolder)
 %RESUMABLEEXCELSAVINGEXPERIMENT Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -16,7 +16,7 @@ function [ ] = ResumableExcelSavingExperiment( ...
 %     'Test', ...                   % experimentCodeName
 %     varNameList, ...
 %     varRangeList, ...
-%     cd);                          % DATAFOLDER
+%     cd);                          % rootFolder
 %
 
 
@@ -68,14 +68,14 @@ while(~strcmp(flag,'finished'))
     previousPercentage = percentage;
     
     % make a result folder
-    RESULTFOLDER = fullfile(DATAFOLDER, ...
+    resultFolder = fullfile(rootFolder, ...
         [experimentCodeName,'-',datestr(now,'yyyymmdd-HHMMSS')]);
-    if exist(RESULTFOLDER,'dir') ~= 7
-        mkdir(RESULTFOLDER);
+    if exist(resultFolder,'dir') ~= 7
+        mkdir(resultFolder);
     end
     
     % experiment code
-    currentResult = expFunctionHandle(combination, varNameList);
+    currentResult = expFunctionHandle(combination, varNameList, resultFolder);
     
     % save results to an excel file
     firstValue = [];
@@ -88,7 +88,7 @@ while(~strcmp(flag,'finished'))
         = SaveAValueToResults(results{excelIndex},...
         firstValue,secondValue,currentResult);
     for i=1:length(results)
-        xlswrite(fullfile(RESULTFOLDER,excelNameStrings(i,:)),results{i});
+        xlswrite(fullfile(resultFolder,excelNameStrings(i,:)),results{i});
     end
     
     % update resumable experiment
