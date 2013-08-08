@@ -45,11 +45,27 @@ cacheExcelFileName = [experimentCodeName '_excel_cache.mat'];
 [excelIndex, ~, ~] = ...
     ResumableExperimentStart(excelIndexList, cacheExcelFileName);
 
+previousPercentage = 0;
+tStart = tic;
 % main loop
 while(~strcmp(flag,'finished'))
     
+    % time ticking
+    tElapsed = toc(tStart);
+    tStart = tic;
+    
     % print out log
-    fprintf('%3.2f%% finished \n', percentage*100);
+    if previousPercentage > eps && percentage > previousPercentage
+        howLongTimeToGo = tElapsed ...
+            * (1 - percentage)...
+            / (percentage - previousPercentage);
+        future = Seconds2String(howLongTimeToGo);
+        fprintf('%3.2f%% finished. Still %s to go. \n', ...
+            percentage*100, future);
+    else
+        fprintf('%3.2f%% finished \n', percentage*100);
+    end
+    previousPercentage = percentage;
     
     % make a result folder
     RESULTFOLDER = fullfile(DATAFOLDER, ...
@@ -63,9 +79,11 @@ while(~strcmp(flag,'finished'))
     
     % save results to an excel file
     firstValue = [];
-    eval(sprintf('firstValue = combination.%s;',cell2mat(varNameList(1))));
+    eval(sprintf('firstValue = combination.%s;', ...
+        cell2mat(varNameList(1))));
     secondValue = [];
-    eval(sprintf('secondValue = combination.%s;',cell2mat(varNameList(2))));
+    eval(sprintf('secondValue = combination.%s;', ...
+        cell2mat(varNameList(2))));
     results{excelIndex} ...
         = SaveAValueToResults(results{excelIndex},...
         firstValue,secondValue,currentResult);
@@ -84,7 +102,6 @@ while(~strcmp(flag,'finished'))
         fprintf('All finished.\n');
     end
 end
-
 
 end
 
