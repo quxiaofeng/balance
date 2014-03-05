@@ -1,26 +1,26 @@
 function [ debug_state ] = CheckDebugStatus( debug_state )
-%CHECKDEBUGSTATUS Check debug status
+% CHECKDEBUGSTATUS Check debug status
 %    debug_state = CheckDebugStatus(debug_state) parse a general debug
 %    description to a standard logical value.
-%
-%
-%    It returns true (in a debugging state) if input is
+% 
+% 
+%    It returns true (in a debugging state) if the input is
 %       1, true, 'debug', 'test'.
-%    It returns false (in a non-debugging state) if input is
+%    It returns false (in a non-debugging state) if the input is
 %       0, false, 'release', 'run'.
 %    Default (blank) input leads to false. (Not debugging)
-%
-%
+% 
+% 
 %    After using this function, debug related code in scripts and functions
 %    can be simply surrounded by
-%
+% 
 %        if debug_state
 %            ...
 %        end
-%
-%
+% 
+% 
 %    In addition, the function using CheckDebugStatus can be formatted as
-%
+% 
 %       function [ result ] = Test(vars, debug)
 % 
 %           debug = CheckDebugStatus( debug );
@@ -33,7 +33,7 @@ function [ debug_state ] = CheckDebugStatus( debug_state )
 %           end
 %           display(result);
 %       end
-%
+% 
 %    For more information, see <a href="matlab:
 %    web('https://github.com/quxiaofeng/balance')">balance</a>.
 
