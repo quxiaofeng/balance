@@ -1,6 +1,6 @@
 function [combination, flag, percent] ...
-    = ResumableExperimentUpdate(combinationList, cacheFileName)
-%RESUMABLEEXPERIMENTUPDATE Summary of this function goes here
+    = updateresumable(combinationList, cacheFileName)
+%updateresumable Update the resumable env
 %   Detailed explanation goes here
 %     + Update
 %       + load existing progress_cache.mat
@@ -39,7 +39,7 @@ if exist(cacheFileName,'file') == 2
 else
     % init
     [combination, flag, percent] = ...
-        ResumableExperimentStart(combinationList);
+        updateresumable(combinationList);
 end
 
 end

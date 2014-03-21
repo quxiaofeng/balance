@@ -3,7 +3,7 @@
 %   Run this script.
 
 clean = true;
-run = false;
+run = true;
 
 if clean
     % clean result folders

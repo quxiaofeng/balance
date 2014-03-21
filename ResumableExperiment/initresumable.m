@@ -1,6 +1,6 @@
 function [ combination, flag, percent] = ...
-    ResumableExperimentStart(combinationList, cacheFileName)
-%RESUMABLEEXPERIMENTSTART Summary of this function goes here
+    initresumable(combinationList, cacheFileName)
+%initresumable Summary of this function goes here
 %   Detailed explanation goes here
 %     + Start
 %       + search for existing progress_cache.mat
@@ -26,7 +26,7 @@ if exist(cacheFileName,'file') == 2
     % resume
     load(cacheFileName,'combinationList','progress');
     if progress >= length(combinationList)
-        [combination, flag, percent] = ResumableExperimentUpdate;
+        [combination, flag, percent] = updateresumable;
         return;
     end
 else
