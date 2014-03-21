@@ -12,7 +12,7 @@ function [ ] = resumable( ...
 % varNameList  = {'DELTA'     'SIGMA'     'FILTERSIZE'    'BLOCK'};
 % varRangeList = {[0.1 0.2]   [1 2]       [10 20]         [100 200]};
 % resumable( ...
-%     @ResumableTestExperiment, ... % expFunctionHandle
+%     @objectfunction, ... % expFunctionHandle
 %     'Test', ...                   % experimentCodeName
 %     varNameList, ...
 %     varRangeList, ...
@@ -38,12 +38,12 @@ end
 % init resumable
 cacheFileName = [experimentCodeName '_cache.mat'];
 [combination, flag, percentage] = ...
-    ResumableExperimentStart(combinationList, cacheFileName);
+    initresumable(combinationList, cacheFileName);
 
 % init resumable for result index
 cacheExcelFileName = [experimentCodeName '_excel_cache.mat'];
 [excelIndex, ~, ~] = ...
-    ResumableExperimentStart(excelIndexList, cacheExcelFileName);
+    initresumable(excelIndexList, cacheExcelFileName);
 
 previousPercentage = 0;
 tStart = tic;
@@ -93,9 +93,9 @@ while(~strcmp(flag,'finished'))
     
     % update resumable experiment
     [combination, flag, percentage] = ...
-        ResumableExperimentUpdate(combinationList, cacheFileName);
+        updateresumable(combinationList, cacheFileName);
     [excelIndex, ~, ~] = ...
-        ResumableExperimentUpdate(excelIndexList, cacheExcelFileName);
+        updateresumable(excelIndexList, cacheExcelFileName);
     
     % stop criteria
     if abs(percentage-1) < eps
@@ -307,4 +307,101 @@ for iCombination=1:size(excelNameStrings,1),
 end
 
 end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function [ combination, flag, percent] = ...
+    initresumable(combinationList, cacheFileName)
+%initresumable Summary of this function goes here
+%   Detailed explanation goes here
+%     + Start
+%       + search for existing progress_cache.mat
+%       + if found, load combinationList and progress, return a combination and 'continue'
+%       + if not found, init the combinationList and progress
+%     + Init
+%       + create a progress_cache.mat
+%       + create a combinationList
+%       + init the progress
+%       + save combinationList and progress
+%       + return a combination and 'continue'
+
+switch nargin
+    case 2
+    case 1
+        cacheFileName = 'progress_cache.mat';
+    otherwise
+        error('Wrong number of parameters!');
+end
+
+% start
+if exist(cacheFileName,'file') == 2
+    % resume
+    load(cacheFileName,'combinationList','progress');
+    if progress >= length(combinationList)
+        [combination, flag, percent] = updateresumable;
+        return;
+    end
+else
+    % init
+    progress = 0;
+    save(cacheFileName, 'combinationList', 'progress');
+end
+combination = combinationList(progress+1);
+flag = 'continue';
+percent = progress / length(combinationList);
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function [combination, flag, percent] ...
+    = updateresumable(combinationList, cacheFileName)
+%updateresumable Update the resumable env
+%   Detailed explanation goes here
+%     + Update
+%       + load existing progress_cache.mat
+%       + if yes, update the progress
+%       + if not, goto Start
+%       + check if finished.
+%       + if not finished, return another combination and 'continue'
+%       + if finished, delete progress_cache.mat and return last combination and 'finished'
+
+switch nargin
+    case 2
+    case 1
+        cacheFileName = 'progress_cache.mat';
+    otherwise
+        error('Wrong number of parameters!');
+end
+
+% check
+if exist(cacheFileName,'file') == 2
+    % update
+    load(cacheFileName,'combinationList','progress');
+    progress = progress + 1;
+    if progress >= length(combinationList)
+        % finished
+        delete(cacheFileName);
+        combination = combinationList(end);
+        flag = 'finished';
+        percent = 1.0;
+    else
+        % continue
+        combination = combinationList(progress + 1);
+        flag = 'continue';
+        percent = progress / length(combinationList);
+        save(cacheFileName, 'combinationList', 'progress');
+    end
+else
+    % init
+    [combination, flag, percent] = ...
+        updateresumable(combinationList);
+end
+
+end
+
+
 
