@@ -22,18 +22,20 @@ function [ debug_state ] = isdebugging( debug_state )
 % 
 %    In addition, the function using isdebugging can be formatted as
 % 
-%       function [ result ] = Test(vars, debugState)
+%         function displaydebugstate(vars, debugState)
 % 
-%           debugState = isdebugging( debugState );
+%         debugState = isdebugging( debugState );
 % 
-%           if debugState
-%               display 'debugging';
-%               result = 'debugging';
-%           else
-%               result = 'running';
-%           end
-%           display(result);
-%       end
+%         if debugState
+%             display 'debugging';
+%             result = 'debugging';
+%         else
+%             result = 'running';
+%         end
+% 
+%         display(result);
+% 
+%         end
 % 
 %    For more information, see <a href="matlab:
 %    web('https://github.com/quxiaofeng/balance')">balance</a>.
