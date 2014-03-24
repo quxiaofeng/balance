@@ -18,7 +18,7 @@ classdef SaveResultsTest < matlab.unittest.TestCase
         rowIndex;
         colIndex;
     end
-    methods(TestMethodSetup)
+    methods(TestClassSetup)
         function prepareValues(testCase)
             testCase.DELTA=3;
             testCase.DELTARANGE=1:10;
@@ -38,7 +38,7 @@ classdef SaveResultsTest < matlab.unittest.TestCase
             testCase.colIndex=3;
         end
     end
-    methods(TestMethodTeardown)
+    methods(TestClassTeardown)
         function removeXlsFile(testCase)
             if exist(testCase.xlsFileName,'file')
                 delete(testCase.xlsFileName);
@@ -49,7 +49,7 @@ classdef SaveResultsTest < matlab.unittest.TestCase
     end
     methods(Test)
         function testInit(testCase)
-            testresults=InitResultsForExcel(...
+            testresults=initresult(...
                 testCase.firstItem,...
                 testCase.DELTARANGE,...
                 testCase.SIGMARANGE);
@@ -57,7 +57,7 @@ classdef SaveResultsTest < matlab.unittest.TestCase
                 'The ''results'' cell is not initialed correctly');
         end
         function testUpdate(testCase)
-            testresults=SaveAValueToResults(testCase.rightInitResult, ...
+            testresults=updateresult(testCase.rightInitResult, ...
                 testCase.DELTA, testCase.SIGMA, testCase.currentValue);
             testCase.verifyEqual(...
                 testresults{testCase.rowIndex,testCase.colIndex}, ...

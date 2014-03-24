@@ -1,7 +1,36 @@
 classdef DebugStateTest < matlab.unittest.TestCase
     % DebugStateTest tests results returned by isdebugging
+
+    properties
+        TestData
+    end
+ 
+    methods(TestClassSetup)
+        function setup(testCase)
+            testCase.TestData.RefOutputFilename = 'ref.txt';
+            testCase.TestData.OutputFilename = 'output.txt';
+            testCase.TestData.ExampleCommand = ...
+                            'run ..\example\displaydebugstate(1,''debug'')';
+        end
+    end
+ 
+    methods(TestClassTeardown)
+        function teardown(testCase)
+            delete(testCase.TestData.OutputFilename);
+        end
+    end
     
     methods (Test)
+        function testExample(testCase) % the example function
+            % the expected output is 'ref.txt'
+            expOutputText = fileread(testCase.TestData.RefOutputFilename);
+            fileID = fopen(testCase.TestData.OutputFilename,'w');
+            nbytes = fprintf(fileID,'%s', ...
+                evalc(testCase.TestData.ExampleCommand));
+            fclose(fileID);
+            outputText = fileread(testCase.TestData.OutputFilename);
+            verifyEqual(testCase,outputText,expOutputText);
+        end
 
         function testNumberOne(testCase) % 1
             debugState = isdebugging(1);
@@ -112,7 +141,5 @@ classdef DebugStateTest < matlab.unittest.TestCase
             expDebugState = false;
             verifyEqual(testCase,debugState,expDebugState);
         end
-
-    end
-    
+    end    
 end

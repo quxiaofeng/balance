@@ -1,5 +1,5 @@
 function [ eer ] = exampleexperiment(combination, varNameList, ...
-    RESULTFOLDER)
+    expEnv)
 %RESUMABLETESTEXPERIMENT Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -12,10 +12,12 @@ end
 % simulated experiment code
 eer = SIGMA + DELTA + FILTERSIZE + BLOCK;
 
-display(sprintf(['\nSIGMA = %3.3f; DELTA = %3.3f; FILTERSIZE = %3.3f; ', ...
-    'BLOCK = %3.3f'], SIGMA, DELTA, FILTERSIZE, BLOCK));
-display(sprintf('RESULTFOLDER = %s\n',...
-    RESULTFOLDER));
+% display(sprintf(['\nSIGMA = %3.3f; DELTA = %3.3f; FILTERSIZE = %3.3f; ', ...
+%     'BLOCK = %3.3f'], SIGMA, DELTA, FILTERSIZE, BLOCK));
+% display(sprintf('RESULTFOLDER = %s',...
+%     expEnv.RESULTFOLDER));
+% display(sprintf('Result = %3.3f\n',...
+%     eer));
 
 end
 

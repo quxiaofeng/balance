@@ -1,9 +1,8 @@
 function [ ] = resumable( ...
     expFunctionHandle, ...
-    experimentCodeName, ...
     varNameList, ...
     varRangeList, ...
-    rootFolder)
+    expEnv)
 %resumable Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -16,7 +15,7 @@ function [ ] = resumable( ...
 %     'Test', ...                   % experimentCodeName
 %     varNameList, ...
 %     varRangeList, ...
-%     cd);                          % rootFolder
+%     expEnv);                      % expEnv
 %
 
 
@@ -30,69 +29,80 @@ function [ ] = resumable( ...
 % init excels
 results = cell(size(excelNameStrings,1),1);
 for iExcelLine = 1:size(excelNameStrings,1)
-    results{iExcelLine} = InitResultsForExcel( ...
+    results{iExcelLine} = initresult( ...
         excelNameStrings(iExcelLine,:), cell2mat(varRangeList(1)), ...
         cell2mat(varRangeList(2)));
 end
 
 % init resumable
-cacheFileName = [experimentCodeName '_cache.mat'];
-[combination, flag, percentage] = ...
+cacheFileName = [expEnv.CODENAME '_cache.mat'];
+[combination, isFinished, percentage] = ...
     initresumable(combinationList, cacheFileName);
 
 % init resumable for result index
-cacheExcelFileName = [experimentCodeName '_excel_cache.mat'];
+cacheExcelFileName = [expEnv.CODENAME '_excel_cache.mat'];
 [excelIndex, ~, ~] = ...
     initresumable(excelIndexList, cacheExcelFileName);
 
 previousPercentage = 0;
 tStart = tic;
+isFirstRun = true;
 % main loop
-while(~strcmp(flag,'finished'))
+while(~isFinished)
     
     % time ticking
     tElapsed = toc(tStart);
     tStart = tic;
     
-    % print out log
-    if previousPercentage > eps && percentage > previousPercentage
+    % print out log if it is not the first exp or it is not a pick up exp
+    if isFirstRun
+        isPickup = percentage > 0;
+        if isPickup
+            fprintf('Start from %03.3f%% \n', percentage*100);
+            load([expEnv.CODENAME '_results.mat'], 'results');
+        else
+            fprintf('Start \n');
+        end
+    else
         howLongTimeToGo = tElapsed ...
             * (1 - percentage)...
             / (percentage - previousPercentage);
         future = seconds2string(howLongTimeToGo);
-        fprintf('%3.2f%% finished. Still %s to go. \n', ...
+        fprintf('    %03.3f%% finished. Still %s to go ... \n', ...
             percentage*100, future);
-    else
-        fprintf('%3.2f%% finished \n', percentage*100);
     end
+    
     previousPercentage = percentage;
+    isFirstRun = false;
     
     % make a result folder
-    resultFolder = fullfile(rootFolder, ...
-        [experimentCodeName,'-',datestr(now,'yyyymmdd-HHMMSS')]);
+    resultFolder = fullfile(expEnv.RESULTFOLDER, ...
+        [expEnv.CODENAME,'-',datestr(now,'yyyymmdd-HHMMSS')]);
     if exist(resultFolder,'dir') ~= 7
         mkdir(resultFolder);
     end
     
     % experiment code
-    currentResult = expFunctionHandle(combination, varNameList, resultFolder);
+    currentResult = expFunctionHandle(combination, varNameList, expEnv);
+    
     
     % save results to an excel file
     firstValue = [];
     eval(sprintf('firstValue = combination.%s;', ...
-        cell2mat(varNameList(1))));
+        cell2mat(varNameList(1)))); % extract fisrt value name
     secondValue = [];
     eval(sprintf('secondValue = combination.%s;', ...
-        cell2mat(varNameList(2))));
+        cell2mat(varNameList(2))));% extract second value name
     results{excelIndex} ...
-        = SaveAValueToResults(results{excelIndex},...
+        = updateresult(results{excelIndex},...
         firstValue,secondValue,currentResult);
+    save([expEnv.CODENAME '_results.mat'], 'results');
     for i=1:length(results)
         xlswrite(fullfile(resultFolder,excelNameStrings(i,:)),results{i});
     end
     
     % update resumable experiment
-    [combination, flag, percentage] = ...
+    [combination, isFinished, percentage] = ...
         updateresumable(combinationList, cacheFileName);
     [excelIndex, ~, ~] = ...
         updateresumable(excelIndexList, cacheExcelFileName);
@@ -130,52 +140,52 @@ if seconds > SECONDS_PER_MONTH % How many monthes
     tMonthes = floor(seconds/SECONDS_PER_MONTH);
     seconds = mod(seconds, SECONDS_PER_MONTH);
     if isempty(timeString)
-        timeString = sprintf('%.0f Month',tMonthes);
+        timeString = sprintf('%.0f Months',tMonthes);
     else
-        timeString = strjoin({timeString sprintf('%.0f Month',tMonthes)});
+        timeString = strjoin({timeString sprintf('%.0f Months',tMonthes)});
     end
 end
 if seconds > SECONDS_PER_WEEK % How many weeks
     tWeeks = floor(seconds/SECONDS_PER_WEEK);
     seconds = mod(seconds, SECONDS_PER_WEEK);
     if isempty(timeString)
-        timeString = sprintf('%.0f Week',tWeeks);
+        timeString = sprintf('%.0f Weeks',tWeeks);
     else
-        timeString = strjoin({timeString sprintf('%.0f Week',tWeeks)});
+        timeString = strjoin({timeString sprintf('%.0f Weeks',tWeeks)});
     end
 end
 if seconds > SECONDS_PER_DAY % How many days
     tDays = floor(seconds/SECONDS_PER_DAY);
     seconds = mod(seconds, SECONDS_PER_DAY);
     if isempty(timeString)
-        timeString = sprintf('%.0f Day',tDays);
+        timeString = sprintf('%.0f Days',tDays);
     else
-        timeString = strjoin({timeString sprintf('%.0f Day',tDays)});
+        timeString = strjoin({timeString sprintf('%.0f Days',tDays)});
     end
 end
 if seconds > SECONDS_PER_HOUR % How many hours
     tHours = floor(seconds/SECONDS_PER_HOUR);
     seconds = mod(seconds, SECONDS_PER_HOUR);
     if isempty(timeString)
-        timeString = sprintf('%.0f Hour',tHours);
+        timeString = sprintf('%.0f Hours',tHours);
     else
-        timeString = strjoin({timeString sprintf('%.0f Hour',tHours)});
+        timeString = strjoin({timeString sprintf('%.0f Hours',tHours)});
     end
 end
 if seconds > SECONDS_PER_MINUTE % How many minutes
     tMinutes = floor(seconds/SECONDS_PER_MINUTE);
     seconds = mod(seconds, SECONDS_PER_MINUTE);
     if isempty(timeString)
-        timeString = sprintf('%.0f Minute',tMinutes);
+        timeString = sprintf('%.0f Minutes',tMinutes);
     else
-        timeString = strjoin({timeString sprintf('%.0f Minute',tMinutes)});
+        timeString = strjoin({timeString sprintf('%.0f Minutes',tMinutes)});
     end
 end
 if seconds > eps % How many seconds
     if isempty(timeString)
-        timeString = sprintf('%.2f Second',seconds);
+        timeString = sprintf('%.2f Seconds',seconds);
     else
-        timeString = strjoin({timeString sprintf('%.2f Second',seconds)});
+        timeString = strjoin({timeString sprintf('%.2f Seconds',seconds)});
     end
 end
 
@@ -204,7 +214,7 @@ function [combinationArray, excelNameStrings, excelIndex, ...
 %       Example:
 %           varRangeList = {0.1:0.1:0.2, 1:1:2, [10 20], [100 200]};
 %
-%   
+%
 % *Output*
 %       combinationArray - the struct array of all vars
 %
@@ -312,7 +322,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [ combination, flag, percent] = ...
+function [combination, isFinished, percent] = ...
     initresumable(combinationList, cacheFileName)
 %initresumable Summary of this function goes here
 %   Detailed explanation goes here
@@ -340,7 +350,7 @@ if exist(cacheFileName,'file') == 2
     % resume
     load(cacheFileName,'combinationList','progress');
     if progress >= length(combinationList)
-        [combination, flag, percent] = updateresumable;
+        [combination, isFinished, percent] = updateresumable;
         return;
     end
 else
@@ -349,7 +359,7 @@ else
     save(cacheFileName, 'combinationList', 'progress');
 end
 combination = combinationList(progress+1);
-flag = 'continue';
+isFinished = false;
 percent = progress / length(combinationList);
 end
 
@@ -357,7 +367,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [combination, flag, percent] ...
+function [combination, isFinished, percent] ...
     = updateresumable(combinationList, cacheFileName)
 %updateresumable Update the resumable env
 %   Detailed explanation goes here
@@ -386,18 +396,18 @@ if exist(cacheFileName,'file') == 2
         % finished
         delete(cacheFileName);
         combination = combinationList(end);
-        flag = 'finished';
+        isFinished = true;
         percent = 1.0;
     else
         % continue
         combination = combinationList(progress + 1);
-        flag = 'continue';
+        isFinished = false;
         percent = progress / length(combinationList);
         save(cacheFileName, 'combinationList', 'progress');
     end
 else
     % init
-    [combination, flag, percent] = ...
+    [combination, isFinished, percent] = ...
         updateresumable(combinationList);
 end
 

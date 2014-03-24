@@ -1,3 +1,3 @@
 clear testCase;
-testCase = DebugStateTest;
+testCase = SaveResultsTest;
 results = run(testCase)
